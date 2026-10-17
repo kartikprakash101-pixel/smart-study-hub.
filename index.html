@@ -1,0 +1,274 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Study Hub</title>
+<style>
+:root {
+  --bg:#f5f7ff;
+  --card:#ffffff;
+  --text:#172033;
+  --muted:#64748b;
+  --primary:#5145e5;
+  --border:#e5e7eb;
+}
+body.dark {
+  --bg:#0f172a;
+  --card:#1e293b;
+  --text:#f8fafc;
+  --muted:#cbd5e1;
+  --border:#334155;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  transition:.2s;
+}
+header {
+  background:var(--card);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:5;
+}
+nav {
+  max-width:1100px;
+  margin:auto;
+  padding:16px 20px;
+  display:flex;align-items:center;
+  justify-content:space-between;gap:12px;
+}
+.logo {font-size:22px;font-weight:bold;color:var(--primary)}
+nav button, .btn {
+  border:0;border-radius:10px;padding:11px 15px;
+  background:var(--primary);color:white;
+  cursor:pointer;font-weight:bold;
+}
+.hero {
+  padding:65px 20px;text-align:center;
+  background:linear-gradient(135deg,#5145e5,#8b5cf6);
+  color:white;
+}
+.hero h1 {font-size:clamp(32px,6vw,52px);margin:0 0 15px}
+.hero p {font-size:17px;line-height:1.6}
+.search {
+  width:min(520px,100%);padding:15px;
+  border:0;border-radius:12px;font-size:16px;
+  margin-top:15px;
+}
+.container {max-width:1100px;margin:auto;padding:35px 20px}
+.section-title {margin:0 0 20px;font-size:26px}
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:18px;
+}
+.card {
+  background:var(--card);padding:23px;
+  border:1px solid var(--border);border-radius:17px;
+  box-shadow:0 5px 20px #00000008;
+}
+.card h3 {margin:10px 0}
+.card p {color:var(--muted);line-height:1.5}
+.emoji {font-size:36px}
+.card button {
+  border:0;border-radius:9px;padding:11px 14px;
+  background:var(--primary);color:white;cursor:pointer;
+}
+.notes {margin-top:35px}
+.note-content {
+  background:var(--card);padding:24px;
+  border:1px solid var(--border);border-radius:15px;
+  line-height:1.8;
+}
+.note-content h3 {color:var(--primary)}
+.quiz-option {
+  display:block;width:100%;text-align:left;
+  padding:13px;margin:10px 0;border:1px solid var(--border);
+  background:var(--bg);color:var(--text);
+  border-radius:10px;cursor:pointer;
+}
+footer {text-align:center;padding:28px;color:var(--muted)}
+.hidden {display:none}
+@media(max-width:600px) {
+  nav {padding:12px}
+  .logo {font-size:18px}
+  .hero {padding:45px 16px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <div class="logo">?? Smart Study Hub</div>
+    <button onclick="toggleDark()" id="themeBtn">?? Dark Mode</button>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>Learn Smarter, Not Harder!</h1>
+  <p>Your learning journey starts here.<br>
+  Notes, quizzes and study resources in one place.</p>
+  <input class="search" id="search"
+    placeholder="?? Search subjects..."
+    oninput="searchSubjects()">
+</section>
+
+<main class="container">
+  <h2 class="section-title">?? Explore Subjects</h2>
+  <div class="grid" id="subjects">
+
+    <div class="card subject" data-name="science">
+      <div class="emoji">??</div>
+      <h3>Science</h3>
+      <p>Biology, Chemistry, Physics and experiments.</p>
+      <button onclick="showNotes('science')">Study Notes ?</button>
+    </div>
+
+    <div class="card subject" data-name="maths mathematics">
+      <div class="emoji">??</div>
+      <h3>Mathematics</h3>
+      <p>Formulas, examples and problem-solving practice.</p>
+      <button onclick="showNotes('maths')">Study Notes ?</button>
+    </div>
+
+    <div class="card subject" data-name="social science history geography civics">
+      <div class="emoji">??</div>
+      <h3>Social Science</h3>
+      <p>History, Geography, Civics and Economics.</p>
+      <button onclick="showNotes('social')">Study Notes ?</button>
+    </div>
+
+    <div class="card subject" data-name="english grammar writing">
+      <div class="emoji">??</div>
+      <h3>English</h3>
+      <p>Grammar, vocabulary, writing and literature.</p>
+      <button onclick="showNotes('english')">Study Notes ?</button>
+    </div>
+  </div>
+
+  <section class="notes hidden" id="notes">
+    <h2 class="section-title" id="noteTitle">Study Notes</h2>
+    <div class="note-content" id="noteContent"></div>
+    <br>
+    <button class="btn" onclick="hideNotes()">? Back to Subjects</button>
+  </section>
+
+  <section class="notes">
+    <h2 class="section-title">?? Quick Quiz</h2>
+    <div class="card">
+      <h3 id="question">Which planet is known as the Red Planet?</h3>
+      <div id="options"></div>
+      <p id="quizResult" aria-live="polite"></p>
+      <button onclick="nextQuestion()">Next Question ?</button>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>© 2026 Smart Study Hub | Learn • Practice • Grow</p>
+  <p>Made for curious learners ??</p>
+</footer>
+
+<script>
+const notes = {
+  science: {
+    title:"?? Science Notes",
+    content:`<h3>What is Science?</h3>
+    Science is the systematic study of the natural world through
+    observation and experiments.
+    <h3>Three Main Branches</h3>
+    <ul><li>Physics: Matter, energy, force and motion.</li>
+    <li>Chemistry: Substances and their changes.</li>
+    <li>Biology: Living organisms and life processes.</li></ul>
+    <p>Add your chapter-wise class notes here.</p>`
+  },
+  maths: {
+    title:"?? Mathematics Notes",
+    content:`<h3>Useful Formula</h3>
+    <p>Area of a rectangle = Length × Breadth</p>
+    <p>Perimeter of a rectangle = 2 × (Length + Breadth)</p>
+    <p>Area of a square = Side × Side</p>
+    <p>Add your class formulas and solved examples here.</p>`
+  },
+  social: {
+    title:"?? Social Science Notes",
+    content:`<h3>Social Science</h3>
+    <p>Social Science helps us understand society, history,
+    geography, government and economic activities.</p>
+    <ul><li>History: Study of the past.</li>
+    <li>Geography: Study of Earth and its features.</li>
+    <li>Civics: Study of citizens and government.</li>
+    <li>Economics: Study of resources and choices.</li></ul>`
+  },
+  english: {
+    title:"?? English Notes",
+    content:`<h3>Parts of Speech</h3>
+    <ul><li>Noun: Names a person, place or thing.</li>
+    <li>Pronoun: Used instead of a noun.</li>
+    <li>Verb: Expresses an action or state.</li>
+    <li>Adjective: Describes a noun.</li>
+    <li>Adverb: Describes a verb, adjective or adverb.</li></ul>`
+  }
+};
+
+function showNotes(subject) {
+  document.getElementById("notes").classList.remove("hidden");
+  document.getElementById("noteTitle").textContent=notes[subject].title;
+  document.getElementById("noteContent").innerHTML=notes[subject].content;
+  document.getElementById("notes").scrollIntoView({behavior:"smooth"});
+}
+function hideNotes() {
+  document.getElementById("notes").classList.add("hidden");
+}
+function searchSubjects() {
+  const q=document.getElementById("search").value.toLowerCase();
+  document.querySelectorAll(".subject").forEach(card=>{
+    card.style.display=card.dataset.name.includes(q)?"block":"none";
+  });
+}
+function toggleDark() {
+  document.body.classList.toggle("dark");
+  document.getElementById("themeBtn").textContent=
+    document.body.classList.contains("dark")?"?? Light Mode":"?? Dark Mode";
+}
+const quiz=[
+  {q:"Which planet is known as the Red Planet?",
+   o:["Earth","Mars","Venus","Jupiter"],a:1},
+  {q:"What is 8 × 7?",
+   o:["54","56","64","48"],a:1},
+  {q:"Which gas do plants absorb during photosynthesis?",
+   o:["Oxygen","Nitrogen","Carbon dioxide","Hydrogen"],a:2}
+];
+let qi=0,answered=false;
+function renderQuiz(){
+  answered=false;
+  document.getElementById("question").textContent=quiz[qi].q;
+  document.getElementById("quizResult").textContent="";
+  document.getElementById("options").innerHTML="";
+  quiz[qi].o.forEach((option,i)=>{
+    const b=document.createElement("button");
+    b.className="quiz-option";
+    b.textContent=option;
+    b.onclick=()=>checkAnswer(i);
+    document.getElementById("options").appendChild(b);
+  });
+}
+function checkAnswer(i){
+  if(answered)return;
+  answered=true;
+  document.getElementById("quizResult").textContent=
+    i===quiz[qi].a?"? Correct answer!":"? Not quite. Correct answer: "+quiz[qi].o[quiz[qi].a];
+}
+function nextQuestion(){
+  qi=(qi+1)%quiz.length;
+  renderQuiz();
+}
+renderQuiz();
+</script>
+</body>
+</html>
